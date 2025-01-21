@@ -1,0 +1,81 @@
+# Define variables
+NB_FILE = your_notebook.ipynb         # The Jupyter Notebook file
+PY_FILE = your_script.py              # The Python script file
+DEFAULT_MSG = "Update script"         # Default commit message
+SSH_USER = your_ssh_user              # SSH username for the Khadas board
+SSH_HOST = your_khadas_ip             # IP address or hostname of the Khadas board
+REMOTE_DIR = /path/to/remote/directory # Directory on the Khadas board
+
+# Pair the notebook with the Python script
+pair:
+	jupytext --set-formats ipynb,py:$(PY_FILE) $(NB_FILE)
+
+# Sync the notebook and Python script
+sync:
+	jupytext --sync $(NB_FILE)
+
+# Convert notebook to Python script (one-way)
+convert:
+	jupytext --to script $(NB_FILE)
+
+# Commit changes to GitHub with an optional commit message
+commit:
+	@read -p "Enter commit message (or press Enter to use default): " MSG; \
+	if [ -z "$$MSG" ]; then \
+		MSG="$(DEFAULT_MSG)"; \
+	fi; \
+	git add $(PY_FILE); \
+	git commit -m "$$MSG"
+
+# Commit and push changes to GitHub with an optional commit message
+push:
+	@read -p "Enter commit message (or press Enter to use default): " MSG; \
+	if [ -z "$$MSG" ]; then \
+		MSG="$(DEFAULT_MSG)"; \
+	fi; \
+	git add $(PY_FILE); \
+	git commit -m "$$MSG"; \
+	git push
+
+# Sync, commit, and push changes to GitHub with an optional commit message
+push_sync:
+	@read -p "Enter commit message (or press Enter to use default): " MSG; \
+	if [ -z "$$MSG" ]; then \
+		MSG="$(DEFAULT_MSG)"; \
+	fi; \
+	jupytext --sync $(NB_FILE); \
+	git add $(PY_FILE); \
+	git commit -m "$$MSG"; \
+	git push
+
+# Sync and run script locally
+run_local:
+	@echo "Syncing notebook and Python script..."
+	jupytext --sync $(NB_FILE)
+	@echo "Running script locally..."
+	python3 $(PY_FILE)
+
+# Just run script on Khadas board (no sync or commit)
+run_board:
+	@echo "Connecting to Khadas board to run the script..."
+	ssh $(SSH_USER)@$(SSH_HOST) "\
+		cd $(REMOTE_DIR) && \
+		python3 $(PY_FILE)"
+
+# Sync, commit, push, pull on board, and run script
+deploy_board:
+	@read -p "Enter commit message (or press Enter to use default): " MSG; \
+	if [ -z "$$MSG" ]; then \
+		MSG="$(DEFAULT_MSG)"; \
+	fi; \
+	@echo "Syncing, committing, pushing changes..."
+	jupytext --sync $(NB_FILE); \
+	git add $(PY_FILE); \
+	git commit -m "$$MSG"; \
+	git push
+	@echo "Connecting to Khadas board to pull and run the script..."
+	ssh $(SSH_USER)@$(SSH_HOST) "\
+		cd $(REMOTE_DIR) && \
+		git pull && \
+		python3 $(PY_FILE)"
+
