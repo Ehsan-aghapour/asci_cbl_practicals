@@ -1,3 +1,4 @@
+#SHELL := /bin/bash
 # Define variables
 NAME ?= $(error Please provide the base name using 'make <target> NAME=<base_name>')
 NB_FILE = $(NAME).ipynb              # Derive the notebook file name
@@ -66,7 +67,7 @@ deploy_board:
 	if [ -z "$$MSG" ]; then \
 		MSG="$(DEFAULT_MSG)"; \
 	fi; \
-	@echo "Syncing, committing, pushing changes..."
+	echo "Syncing, committing, pushing changes..."
 	jupytext --sync $(NB_FILE); \
 	git add $(PY_FILE); \
 	git commit -m "$$MSG"; \
