@@ -5,11 +5,11 @@ NB_FILE = $(NAME).ipynb              # Derive the notebook file name
 PY_FILE = $(NAME).py                 # Derive the Python file name
 DEFAULT_MSG = "Update script"        # Default commit message
 SSH_CMD = sshgpu                     # SSH command/script to connect to the server
-REMOTE_DIR = /path/to/remote/directory # Directory on the server
+REMOTE_DIR = /home/ehsan/CV/asci_cbl_practicals # Directory on the server
 
 # Pair the notebook with the Python script
 pair:
-	jupytext --set-formats ipynb,py:$(PY_FILE) $(NB_FILE)
+	jupytext --set-formats ipynb,py $(NB_FILE)
 
 # Sync the notebook and Python script
 sync:
